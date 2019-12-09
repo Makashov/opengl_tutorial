@@ -10,47 +10,45 @@ int main(int argc, char * argv[]) {
 
     const GLint w = 1024, h = 768;
 
-    if (!glfwInit()) {
-        exit(EXIT_FAILURE);
-    }
+    if (!glfwInit())
+        return -1;
 
     GLFWwindow * window;
     window = glfwCreateWindow(w, h, "Title", nullptr, nullptr);
 
-    if (!window) {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
+    if (!window)
+        return -1;
+
     glfwMakeContextCurrent(window);
 
     glewExperimental = true;
-    GLenum glewError = glewInit();
-    if (glewError != GLEW_OK) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(glewError));
-        return EXIT_FAILURE;
-    }
+    if (glewInit() != GLEW_OK)
+        return -1;
 
-    if (!GLEW_VERSION_3_0) {
-        return EXIT_FAILURE;
-    }
+    float positions[6] = {
+            -0.5f, -0.5f,
+            0.0f, 0.5f,
+            0.5f, -0.5f,
+    };
 
-    const GLubyte * p = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    cout << "Graphics driver version: " << p << endl;
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
 
-    const GLubyte * glsl = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    cout << "GLSL version: " << glsl << endl;
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
 
-    if (GLEW_ARB_vertex_array_object) {
-        printf("OK");
-    }
 
     while (!glfwWindowShouldClose(window)) {
-        glViewport(0, 0, w, h);
-        glClearColor(0, 0, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
         glfwSwapBuffers(window);
+
         glfwPollEvents();
+
     }
 
     glfwDestroyWindow(window);
